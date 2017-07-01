@@ -1,0 +1,129 @@
+\documentclass{article}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning}
+\usepackage{amsmath,times}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{bm}
+\newcommand*{\vect}[1]{\bm{#1}}
+\newcommand*{\diel}{\varepsilon} % Permittivity
+\newcommand*{\diels}{\varepsilon_\mathrm{s}}
+\newcommand*{\dield}{\varepsilon_\infty}
+\newcommand*{\bi}[1]{\hat{\mathcal{#1}}} % Boundary integral operator
+\newcommand*{\asc}{\sigma} % ASC
+\newcommand*{\esp}{\varphi} % MEP
+
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{tikzpicture}
+\setlength\PreviewBorder{5pt}%
+
+%%
+% Taken from ColorBrewer 2.0 http://colorbrewer2.org/?type=diverging&scheme=RdYlBu&n=5
+\definecolor{brewerRed}{RGB}{215, 25, 28}
+\definecolor{brewerOrange}{RGB}{253, 174, 97}
+\definecolor{brewerYellow}{RGB}{255, 255, 191}
+\definecolor{brewerCyan}{RGB}{171, 217, 233}
+\definecolor{brewerBlue}{RGB}{44, 123, 182}
+
+\begin{document}
+
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+% Define block styles used later
+
+\tikzstyle{input}=[draw, fill=green!20, text width=7em,
+    text centered, minimum height=2.5em]
+\tikzstyle{interface}=[draw, fill=brewerBlue!20, text width=7em,
+    text centered, minimum height=2.5em]
+\tikzstyle{pcm} = [draw, fill=brewerRed!20, text width=10em, text centered,
+    minimum height=6em, rounded corners]
+
+% Define distances for bordering
+\def\blockdist{2.3}
+\def\parsdist{1.15}
+\def\edgedist{2.5}
+
+\begin{tikzpicture}
+    %PCM Code part
+    \node (pcm) [pcm]  {PCM code
+    \[
+      \bi{R}_\diel\bi{S}\textcolor{brewerRed}{\sigma(\vect{s})}
+      = - \bi{R}_\infty\textcolor{brewerBlue}{\esp(\vect{s})}
+    \]};
+    \path (pcm.west)+(-3.2,0.0) node (inputpcm) [input] {\texttt{input.pcm}};
+    \path (pcm.east)+(\blockdist,0) node (interfacepcm) [interface] {Module-side interface};
+    \path (pcm.south) +(0,-\parsdist) node (module) {};
+    \path (pcm.180)+(-1.0,0.0) node (parsing) {};
+
+    \path (parsing)+(0.0,1.5) node (dummy1) {\small{Input parsing}};
+    \node[below=2.5cm of dummy1] (dummy2) {};
+    \path [draw, ->] (inputpcm.east) -- node [above] {} (parsing);
+
+
+    \draw [dashed] (dummy1) -- (dummy2);
+    \path [draw, ->] (parsing) -- node {} (pcm.180);
+
+    \draw[->] ([yshift= 5pt] pcm.east) -- ([yshift= 5pt] interfacepcm.west);
+    \draw[<-] ([yshift=-5pt] pcm.east) -- ([yshift=-5pt] interfacepcm.west);
+
+    \begin{pgfonlayer}{background}
+        \path (inputpcm.west |- inputpcm.north)+(-0.5,1.8) node (a) {};
+        \path (pcm.south -| pcm.east)+(+0.5,-0.5) node (b) {};
+        \path (interfacepcm.east |- module.east)+(+0.5,-0.5) node (c) {};
+
+        \path[fill=brewerYellow!20,rounded corners, draw=black!50, dashed]
+            (a) rectangle (c);
+        \path (inputpcm.north west)+(-0.2,0.2) node (a) {};
+
+    \end{pgfonlayer}
+
+    % QM Code part
+    \path (pcm.south)+(0.0,-4.5) node (qm) [pcm] {QM code
+    \[
+     H\psi = E \psi
+    \]};
+    \path (qm.west)+(-3.2,0.0) node (inputqm) [input] {\texttt{input.qm}};
+
+    \path (qm.east)+(\blockdist,0) node (interfaceqm) [interface] {Program-side interface};
+    \path (qm.south) +(0,-\parsdist) node (module) {};
+    \path (qm.180)+(-1.0,0.0) node (parsing) {};
+
+    \path (parsing)+(0.0,1.5) node (dummy1) {\small{Input parsing}};
+    \node[below=2.5cm of dummy1] (dummy2) {};
+    \path [draw, ->] (inputqm.east) -- node [above] {} (parsing);
+
+
+    \draw [dashed] (dummy1) -- (dummy2);
+    \path [draw, ->] (parsing) -- node {} (qm.180);
+
+    %\path [draw, ->] (input.east) -- node [above] {} (pcm.180);
+
+    \draw[->] ([yshift= 5pt] qm.east) -- ([yshift= 5pt] interfaceqm.west);
+    \draw[<-] ([yshift=-5pt] qm.east) -- ([yshift=-5pt] interfaceqm.west);
+
+    \begin{pgfonlayer}{background}
+        \path (inputqm.west |- inputqm.north)+(-0.5,1.8) node (a) {};
+        \path (qm.south -| qm.east)+(+0.5,-0.5) node (b) {};
+        \path (interfaceqm.east |- module.east)+(+0.5,-0.5) node (c) {};
+
+        \path[fill=brewerYellow!20,rounded corners, draw=black!50, dashed]
+            (a) rectangle (c);
+        \path (inputqm.north west)+(-0.2,0.2) node (a) {};
+
+    \end{pgfonlayer}
+
+    \draw[brewerBlue,thick,->] ([xshift= 5pt] interfaceqm.north) --
+    node [right,yshift=50.5pt] {\bfseries\textcolor{brewerBlue}{$\esp(\vect{s})$}} ([xshift= 5pt] interfacepcm.south);
+    \draw[brewerRed,thick,<-] ([xshift=-5pt] interfaceqm.north) --
+    node [left, yshift=-50pt] {\bfseries\textcolor{brewerRed}{$\sigma(\vect{s})$}} ([xshift=-5pt] interfacepcm.south);
+
+    %\draw[->] (interfacepcm.140) -- (interfaceqm.220);
+    %\draw[->] (interfaceqm.40) -- (interfacepcm.320);
+
+\end{tikzpicture}
+
+\end{document}
